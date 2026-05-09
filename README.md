@@ -1,0 +1,351 @@
+
+pairscale is a highly optimized and robust implementation for pairwise
+rescaling that supports various metrics of central tendency, including
+the mode.
+
+Pairwise normalization consists of two steps. First, for every unique
+pair of columns in the input data matrix, a single measure of central
+tendency (e.g. mean, median, mode) is computed over the difference in
+their values (i.e. all values in column *i* minus all values in column
+*j*). The result is a matrix *M* where columns and rows represent
+columns in the input data matrix and values represent their difference
+(or “distance”). Second, we find the optimal scaling factors for each
+column in the input data matrix such that values in this matrix M are
+minimized.
+
+ 
+
+**License:**
+
+[![License: AGPL
+v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+**Citation:**
+
+*manuscript under review*
+
+# Installation
+
+## 1) Installing R + tools for compiling
+
+### Windows
+
+- R version 4.1 (or higher) is required on Windows
+  - if you already have R installed, check the current version using the
+    R command: `R.version.string`
+  - if you need to install or upgrade R
+    - download the latest/current version from
+      <https://cloud.r-project.org/bin/windows/base/>
+- RTools is required
+  - check RTools is installed using the R command;
+    `pkgbuild::check_rtools()` (assuming you have the “pkgbuild” package
+    installed)
+  - if not, get the RTools installer matching your R version from
+    <https://cloud.r-project.org/bin/windows/Rtools/>
+- Reboot your computer (not mandatory, but this’ll avoid obscure
+  bugs/issues)
+- Download and install the RStudio desktop IDE. Current link;
+  <https://posit.co/download/rstudio-desktop>
+
+### MacOS
+
+- R version 4.3 (or higher) is required on MacOS
+  - if you already have R installed, check the current version using the
+    R command: `R.version.string`
+  - if you need to install or upgrade R
+    - download the latest/current version from
+      <https://mac.r-project.org> . For “apple silicon” MacBooks
+      (approx. 2021 or newer), you’ll need
+      “R-`<current version>`-arm64.pkg”
+    - don’t use the devel/unstable
+- Download and install the RStudio desktop IDE. Current link;
+  <https://posit.co/download/rstudio-desktop>
+- Install the toolchain for compiling code
+  - start RStudio (if you previously opened it, close and start it to
+    get a ‘fresh session’)
+  - issue the following R statements (documentation @
+    <https://github.com/coatless-mac/macrtools> )
+
+``` r
+# install the macrtools R package
+install.packages("remotes")
+remotes::install_github("coatless-mac/macrtools")
+
+# non-interactive installation of Xcode CLI
+macrtools::xcode_cli_install() 
+
+# install gfortran
+macrtools::gfortran_install()
+
+# other binaries required for compiling R
+macrtools::recipes_binary_install('r-base-dev')
+
+# install OpenMP and configure Makevars
+macrtools::openmp_install()
+```
+
+Potential issues;
+
+- `Directory of lock file does not exist: /Users/<username>/Library/Caches/org.R-project.R/R/pkgcache/pkg`
+  during installation suggests you lack write permission to (some part
+  of) this path. Solution; check that this path exists (create if
+  missing) and give your current OS user write permission (at least to
+  the last 4 directories in this path)
+- `ld: library not found for -lgfortran` if this is among your error
+  messages, the Fortran/gfortran compiler is not installed
+- `Failed to build source package <name>` –\> either Xcode/Fortran is
+  not installed, or their version doesn’t line up with your current R
+  version
+
+### Linux
+
+- R version 4.1.0 (or higher) and toolchains for compilation are
+  required
+
+## 2) Install the pairscale R package
+
+pairscale is available on CRAN and can be installed using;
+`install.packages("pairscale")`
+
+- alternatively, install from this GitHub repository instead of CRAN;
+  `remotes::install_github("ftwkoopmans/pairscale")`
+
+On Windows, if you are prompted to install/upgrade RcppArmadillo from
+source or use a precompiled binary, select “from source”.
+
+# Quickstart
+
+- goal: rescale all columns based on pairwise differences such that
+  differences (between columns) are minimized
+- input: typically a log2 transformed protein or gene abundance matrix
+- this example: a tiny data matrix where we’ll use the median-difference
+  between columns as a metric for rescaling/normalizing
+
+``` r
+library(pairscale)
+# minimal example; a tiny data matrix
+# note how the values in each columns are shifted by a constant
+# rescaling should make all columns nearly identical
+mat = cbind(
+  c(1,2,3,4,5),
+  c(2,3,4,5,6),
+  c(1.1,2.1,3.1,4.1,5.1),
+  c(2,3,4,5,9)
+)
+print(mat) # input data / prior to normalization
+```
+
+    ##      [,1] [,2] [,3] [,4]
+    ## [1,]    1    2  1.1    2
+    ## [2,]    2    3  2.1    3
+    ## [3,]    3    4  3.1    4
+    ## [4,]    4    5  4.1    5
+    ## [5,]    5    6  5.1    9
+
+``` r
+# mat is rescaled and modified in-place by pairscale
+# returned variable s represents the applied scaling factors
+s = pairscale::pairscale_median(mat, min_value_count = 3)
+print(mat) # normalized data
+```
+
+    ##       [,1]  [,2]  [,3]  [,4]
+    ## [1,] 1.525 1.525 1.525 1.525
+    ## [2,] 2.525 2.525 2.525 2.525
+    ## [3,] 3.525 3.525 3.525 3.525
+    ## [4,] 4.525 4.525 4.525 4.525
+    ## [5,] 5.525 5.525 5.525 8.525
+
+Above code rescales matrix `mat` considering all column pairs. But if
+your dataset has clusters/groups, you can also normalize within
+cluster/group and then normalize between groups using the `clusters`
+parameter.
+
+``` r
+mat_groups = c(1,1,2,2) # provided groups/clusters must be positive integer values
+s = pairscale::pairscale_median(mat, min_value_count = 3, clusters = mat_groups)
+?pairscale::pairscale_median # see further @ function documentation
+```
+
+## a simulated dataset
+
+For many real-world proteomics/transcriptomics datasets,
+pairwise-differences between samples have an approximately normally
+distributed null distribution (or more generally, a distribution where
+the mode is at the center of the real null). If there are sufficient
+data points, e.g. at least 50 rows in the input matrix (preferably
+hundreds), using the mode is a robust metric for determining the
+relative rescaling of each pair of samples/columns.
+
+- this example: simulate a data matrix with 10 columns/samples, 1000
+  rows/proteins and a substantial set of missing values for low-abundant
+  rows/proteins in the first 5 samples
+- expectation: there are 2 cohorts of distributions, i.e. full
+  distribution and a subset lacking low values, however all overlapping
+  values between columns should be similar post normalization
+- observations:
+  - mode normalization is robust and yields expected outcome
+  - many data pipelines and algorithms (e.g. directLFQ) normalize
+    between samples using the median value per sample as a reference
+    value (‘median shift’ approach). This approach is inaccurate for
+    datasets such as generated in this example!
+
+``` r
+library(pairscale)
+set.seed(123) # fix random seed for reproducibility
+baseline = rnorm(1000, mean = 0, sd = 1) # baseline values for each row/protein
+mat = matrix(NA, nrow = 1000, ncol = 10) # simulated data matrix
+simulated_scaling_factors = runif(n = 10, min = -3, max = 3) # randomly rescale each column
+for(j in 1:10) {
+  # values in column j; baseline values + a bit of random noise per row + mock scaling factor
+  mat[,j] = baseline + runif(n = 1000, min = -0.1, max = 0.1) + simulated_scaling_factors[j]
+  # in the first 5 samples, remove the lowest 25% of values (e.g. strong censoring)
+  # as a result, the distributions between the first and second set of samples are distinct
+  if(j <= 5) {
+    mat[head(order(mat[,j], decreasing = FALSE), n = 250),j] = NA
+  }
+}
+
+# QC: plot the data distributions
+plot(NA, xlim = c(-4, 4), ylim = c(0, 0.75), type = "n", xlab = "value", ylab = "density", main = "INPUT DATA\nblack = full distribution in columns 6:10\nred = subset in columns 1:5")
+for(j in 1:ncol(mat)) {
+  lines(density(mat[,j], na.rm = TRUE), col = 1 + (j <= 5))
+}
+```
+
+![](readme_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+``` r
+# use pairscale to apply mode normalization
+# variable 'mat' is updated by reference (no overhead of creating a copy of the data matrix)
+# returned variable represents the applied scaling factors
+estimated_scaling_factors = pairscale::pairscale_mode(mat, min_value_count = 25)
+
+# for reference, compute scaling factors using the commonly used 'median shift' approach
+mat_column_medians = apply(mat, 2, median, na.rm = TRUE)
+
+# compare simulated differences in 'sample loading' against estimated normalization factors
+# 1) pairscale recapitulates expected scaling factors; minor imprecision due to simulated random noise
+# 2) column medians are not proper scaling factors for this simulated dataset;
+#     'median shift' works for homogenous datasets but fails when sample distributions are dissimilar
+print(cbind(
+ "simulated" = simulated_scaling_factors - mean(simulated_scaling_factors), 
+ "pairscale estimated" = estimated_scaling_factors - mean(estimated_scaling_factors),
+ "column medians" = mat_column_medians - mean(mat_column_medians) 
+))
+```
+
+    ##        simulated pairscale estimated column medians
+    ##  [1,] -0.7263389          -0.7242676      0.1428896
+    ##  [2,] -0.8172877          -0.8200412      0.1537885
+    ##  [3,] -0.7893005          -0.7860611      0.1443449
+    ##  [4,]  1.4022228           1.4086442      0.1493479
+    ##  [5,]  1.2725810           1.2661394      0.1703957
+    ##  [6,]  2.0136738           2.0077481     -0.1477401
+    ##  [7,]  1.0001545           1.0012721     -0.1647724
+    ##  [8,] -1.3503225          -1.3459117     -0.1452875
+    ##  [9,] -1.6520049          -1.6510816     -0.1363727
+    ## [10,] -0.3533776          -0.3564404     -0.1665937
+
+``` r
+plot(NA, xlim = c(-4, 4), ylim = c(0, 0.75), type = "n", xlab = "value", ylab = "density", main = "NORMALIZED\nblack = full distribution in columns 6:10\nred = subset in columns 1:5")
+for(j in 1:ncol(mat)) {
+  lines(density(mat[,j], na.rm = TRUE), col = 1 + (j <= 5))
+}
+```
+
+![](readme_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
+
+``` r
+# visualize the normalized data matrix to illustrate all rows are similar except those set to NA
+heatmap(mat[order(baseline),], Rowv = NA, Colv = NA, scale = "none")
+```
+
+![](readme_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
+
+# benchmark computation speed
+
+Here we evaluate the computation speed of pairscale functions that
+compute measures of central tendency for a given numeric vector;
+
+``` r
+library(pairscale)
+if(!requireNamespace("rbenchmark", quietly = TRUE)) install.packages("rbenchmark")
+
+# find the mode using base R density function
+r_density_mode = function(x, trim = 0) {
+  if(trim > 0) {
+    q = quantile(x, probs = c(trim, 1-trim), na.rm = TRUE)
+    x = x[is.finite(x) & x > q[1] & x < q[2]]
+  }
+  d = stats::density(x, adjust = 1, n = 512, bw = "nrd", na.rm = TRUE)
+  return(d$x[which.max(d$y)])
+}
+
+# 100k vector + 1 extreme value
+x = c(rnorm(100000, mean = 0, sd = 1), 13)
+
+# use rbenchmark package to time pairscale functions for computing measures of central tendency
+# benchmark results shown here were generated on a MacBook Pro with a Apple M4 Max chip under R 4.4.2
+rbenchmark::benchmark(
+  "R trimmedmean" = {d = mean(x, trim = 0.2, na.rm=T)},
+  "R mode" = {d = r_density_mode(x)},
+  "R mode trimmed" = {d = r_density_mode(x, trim = 0.025)},
+  "R median" = {d = median(x, na.rm=T)},
+  "vector_median" = {d = vector_median(x)},
+  "vector_trimmedmean" = {d = vector_trimmedmean(x, trim = 0.2)},
+  "vector_mode(fastest 200)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 200, bandwidth_method = "nrd_fastest")},
+  "vector_mode(fast 200)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 200, bandwidth_method = "nrd_fast")},
+  "vector_mode(200)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 200, bandwidth_method = "nrd")},
+  "vector_mode(fastest 512)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 512, bandwidth_method = "nrd_fastest")},
+  "vector_mode(fast 512)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 512, bandwidth_method = "nrd_fast")},
+  "vector_mode(512)" = {d = vector_mode(x, min_value_count = 1, adjust = 1, kernel_width_in_sd = 3, n_bins = 512, bandwidth_method = "nrd")},
+  replications = 1000, order = "relative", columns = c("test", "replications", "elapsed", "relative", "user.self", "sys.self")
+)
+```
+
+Results on a MacBook Pro:
+
+    #                        test replications elapsed relative user.self sys.self
+    # 7  vector_mode(fastest 200)         1000   0.195    1.000     0.194    0.000
+    # 10 vector_mode(fastest 512)         1000   0.203    1.041     0.202    0.000
+    # 5             vector_median         1000   0.474    2.431     0.471    0.003
+    # 6        vector_trimmedmean         1000   0.782    4.010     0.782    0.000
+    # 4                  R median         1000   0.984    5.046     0.828    0.155
+    # 11    vector_mode(fast 512)         1000   0.999    5.123     0.998    0.001
+    # 8     vector_mode(fast 200)         1000   1.059    5.431     1.058    0.001
+    # 12         vector_mode(512)         1000   1.347    6.908     1.345    0.002
+    # 9          vector_mode(200)         1000   1.453    7.451     1.451    0.002
+    # 1             R trimmedmean         1000   1.479    7.585     1.265    0.213
+    # 2                    R mode         1000   2.012   10.318     1.831    0.180
+    # 3            R mode trimmed         1000   3.749   19.226     3.294    0.454
+
+Results on a Windows workstation:
+
+    #                        test replications elapsed relative user.self sys.self
+    # 10 vector_mode(fastest 512)         1000    0.38    1.000      0.38     0.00
+    # 7  vector_mode(fastest 200)         1000    0.43    1.132      0.43     0.00
+    # 5             vector_median         1000    0.72    1.895      0.72     0.00
+    # 6        vector_trimmedmean         1000    1.14    3.000      1.14     0.00
+    # 11    vector_mode(fast 512)         1000    1.30    3.421      1.30     0.00
+    # 8     vector_mode(fast 200)         1000    1.33    3.500      1.33     0.00
+    # 12         vector_mode(512)         1000    1.75    4.605      1.75     0.00
+    # 9          vector_mode(200)         1000    1.76    4.632      1.76     0.00
+    # 4                  R median         1000    2.09    5.500      2.01     0.08
+    # 1             R trimmedmean         1000    4.24   11.158      3.14     1.11
+    # 2                    R mode         1000    4.86   12.789      4.06     0.80
+    # 3            R mode trimmed         1000    7.71   20.289      7.39     0.33
+
+## a note for R package developers
+
+If you download and open the pairscale.Rproj file and use
+`devtools::load_all()`, instead of going the usual route of
+`install.packages("pairscale"); library(pairscale)`, the above
+benchmarks will underperform because devtools will override compiler
+flags (setting e.g. -O0). To disable this, and thus only use your
+~/.R/Makevars (if available), run this code instead;
+
+``` r
+Sys.setenv("PKG_BUILD_EXTRA_FLAGS" = "false")
+devtools::load_all(recompile = TRUE)
+```
