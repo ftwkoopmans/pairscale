@@ -37,10 +37,10 @@ _manuscript under review_
 - R version 4.1 (or higher) is required on Windows
   - if you already have R installed, check the current version using the R command: `R.version.string`
   - if you need to install or upgrade R
-    - download the latest/current version from https://cloud.r-project.org/bin/windows/base/
+    - download the latest/current version from https://cran.r-project.org/bin/windows/base/
 - RTools is required
   - check RTools is installed using the R command; `pkgbuild::check_rtools()`  (assuming you have the "pkgbuild" package installed)
-  - if not, get the RTools installer matching your R version from https://cloud.r-project.org/bin/windows/Rtools/
+  - if not, get the RTools installer matching your R version from https://cran.r-project.org/bin/windows/Rtools/
 - Reboot your computer (not mandatory, but this'll avoid obscure bugs/issues)
 - Download and install the RStudio desktop IDE. Current link; https://posit.co/download/rstudio-desktop
 

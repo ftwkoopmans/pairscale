@@ -11,18 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// solve_graph_laplacian
-arma::vec solve_graph_laplacian(arma::mat M, int niter_irls);
-RcppExport SEXP _pairscale_solve_graph_laplacian(SEXP MSEXP, SEXP niter_irlsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type M(MSEXP);
-    Rcpp::traits::input_parameter< int >::type niter_irls(niter_irlsSEXP);
-    rcpp_result_gen = Rcpp::wrap(solve_graph_laplacian(M, niter_irls));
-    return rcpp_result_gen;
-END_RCPP
-}
 // vector_mean
 double vector_mean(const arma::vec& x, int min_value_count, std::string na_mode);
 RcppExport SEXP _pairscale_vector_mean(SEXP xSEXP, SEXP min_value_countSEXP, SEXP na_modeSEXP) {
@@ -254,9 +242,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// solve_graph_laplacian
+Rcpp::NumericVector solve_graph_laplacian(arma::mat M, int niter_irls);
+RcppExport SEXP _pairscale_solve_graph_laplacian(SEXP MSEXP, SEXP niter_irlsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type niter_irls(niter_irlsSEXP);
+    rcpp_result_gen = Rcpp::wrap(solve_graph_laplacian(M, niter_irls));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pairscale_solve_graph_laplacian", (DL_FUNC) &_pairscale_solve_graph_laplacian, 2},
     {"_pairscale_vector_mean", (DL_FUNC) &_pairscale_vector_mean, 3},
     {"_pairscale_vector_median", (DL_FUNC) &_pairscale_vector_median, 3},
     {"_pairscale_vector_trimmedmean", (DL_FUNC) &_pairscale_vector_trimmedmean, 4},
@@ -272,6 +271,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pairscale_pairscale_mean", (DL_FUNC) &_pairscale_pairscale_mean, 5},
     {"_pairscale_pairscale_trimmedmean", (DL_FUNC) &_pairscale_pairscale_trimmedmean, 6},
     {"_pairscale_pairscale_madmean", (DL_FUNC) &_pairscale_pairscale_madmean, 6},
+    {"_pairscale_solve_graph_laplacian", (DL_FUNC) &_pairscale_solve_graph_laplacian, 2},
     {NULL, NULL, 0}
 };
 

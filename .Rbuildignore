@@ -2,5 +2,6 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 manuscript/*
-^README.Rmd
+readme_files/*
+README.Rmd
 .DS_Store

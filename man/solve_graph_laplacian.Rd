@@ -11,11 +11,13 @@ solve_graph_laplacian(M, niter_irls = 1L)
 
 \item{niter_irls}{refine the initial estimate using N additional iterative reweighted least squares loops for robust graph laplacian}
 }
+\value{
+a numeric vector of length \code{ncol(M)} that contains scaling factors for \code{M}
+}
 \description{
 find normalization factors for a given distance matrix computed with e.g. \code{pairdiff_median()}. For increased robustness, this function offers iterative reweighted improvement of the initial estimate.
 }
 \examples{
-\dontrun{
 # toy example
 x = cbind(
   c(1,2,3,4),
@@ -24,12 +26,11 @@ x = cbind(
   c(1,0,1,0)
 )
 # compute pairwide median difference between all columns
-M = pairdiff_median(x)
+M = pairscale::pairdiff_median(x)
 # solve matrix M to find scaling factors, without and with reweighting
 s1 = pairscale::solve_graph_laplacian(M, niter_irls = 0)
 s2 = pairscale::solve_graph_laplacian(M, niter_irls = 10)
 # rescaled matrices; only the robust variant correctly aligns columns 1 and 2
-t(t(x) - s1[,1])
-t(t(x) - s2[,1])
-}
+t(t(x) - s1)
+t(t(x) - s2)
 }

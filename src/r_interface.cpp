@@ -202,6 +202,7 @@ arma::uvec validate_clusters(int ncol_input, Rcpp::Nullable<Rcpp::IntegerVector>
 //' @name vector_mean
 //' @inheritParams vector_mode
 //' @inheritParams pairscale_mode
+//' @return a single numeric value representing the mean
 //' @export
 // [[Rcpp::export]]
 double vector_mean(const arma::vec& x, int min_value_count = 1, std::string na_mode = "check") {
@@ -220,6 +221,7 @@ double vector_mean(const arma::vec& x, int min_value_count = 1, std::string na_m
 //' @name vector_median
 //' @inheritParams vector_mode
 //' @inheritParams pairscale_mode
+//' @return a single numeric value representing the median
 //' @export
 // [[Rcpp::export]]
 double vector_median(const arma::vec& x, int min_value_count = 1, std::string na_mode = "check") {
@@ -239,6 +241,7 @@ double vector_median(const arma::vec& x, int min_value_count = 1, std::string na
 //' @inheritParams vector_mode
 //' @inheritParams pairscale_mode
 //' @inheritParams pairscale_trimmedmean
+//' @return a single numeric value representing the trimmed mean
 //' @export
 // [[Rcpp::export]]
 double vector_trimmedmean(const arma::vec& x, int min_value_count = 1, double trim = 0.2, std::string na_mode = "check") {
@@ -259,6 +262,7 @@ double vector_trimmedmean(const arma::vec& x, int min_value_count = 1, double tr
 //' @inheritParams vector_mode
 //' @inheritParams pairscale_mode
 //' @inheritParams pairscale_madmean
+//' @return a single numeric value representing the MAD-trimmed mean
 //' @export
 // [[Rcpp::export]]
 double vector_madmean(const arma::vec& x, int min_value_count = 1, double threshold_std = 3, std::string na_mode = "check") {
@@ -279,6 +283,7 @@ double vector_madmean(const arma::vec& x, int min_value_count = 1, double thresh
 //' @name vector_mode
 //' @inheritParams pairscale_mode
 //' @param x numeric input vector, may contain non-finite values (removed if `na_mode` is left to default)
+//' @return a single numeric value representing the mode
 //' @export
 // [[Rcpp::export]]
 double vector_mode(const arma::vec& x, int min_value_count = 3, int n_bins = 512, double adjust = 1, double kernel_width_in_sd = 3, std::string bandwidth_method = "nrd", double mode_frac_maxdens = 1, std::string na_mode = "check") {
@@ -304,6 +309,7 @@ double vector_mode(const arma::vec& x, int min_value_count = 3, int n_bins = 512
 //' @name pairdiff_mean
 //' @inheritParams pairscale_mode
 //' @inheritParams pairdiff_mode
+//' @return a N x N numeric matrix (where N is number of column in input `x`) representing the mean difference between each column
 //' @export
 // [[Rcpp::export]]
 arma::mat pairdiff_mean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> cols = R_NilValue, int min_value_count = 3, std::string na_mode = "check") {
@@ -320,6 +326,7 @@ arma::mat pairdiff_mean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> 
 //' @name pairdiff_median
 //' @inheritParams pairscale_mode
 //' @inheritParams pairdiff_mode
+//' @return a N x N numeric matrix (where N is number of column in input `x`) representing the median difference between each column
 //' @export
 // [[Rcpp::export]]
 arma::mat pairdiff_median(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> cols = R_NilValue, int min_value_count = 3, std::string na_mode = "check") {
@@ -337,6 +344,7 @@ arma::mat pairdiff_median(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector
 //' @inheritParams pairscale_mode
 //' @inheritParams pairdiff_mode
 //' @inheritParams pairscale_trimmedmean
+//' @return a N x N numeric matrix (where N is number of column in input `x`) representing the trimmed mean difference between each column
 //' @export
 // [[Rcpp::export]]
 arma::mat pairdiff_trimmedmean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> cols = R_NilValue, int min_value_count = 3, double trim = 0.2, std::string na_mode = "check") {
@@ -355,6 +363,7 @@ arma::mat pairdiff_trimmedmean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerV
 //' @inheritParams pairscale_mode
 //' @inheritParams pairdiff_mode
 //' @inheritParams pairscale_madmean
+//' @return a N x N numeric matrix (where N is number of column in input `x`) representing the MAD-trimmed mean difference between each column
 //' @export
 // [[Rcpp::export]]
 arma::mat pairdiff_madmean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> cols = R_NilValue, int min_value_count = 3, double threshold_std = 3, std::string na_mode = "check") {
@@ -372,6 +381,7 @@ arma::mat pairdiff_madmean(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVecto
 //' @name pairdiff_mode
 //' @inheritParams pairscale_mode
 //' @param cols optionally, provide an integer vector with column indices (in `x`) that should be used (these should be 1-based indices as per usual in R). Or set to `NULL` or `integer()` to use all columns
+//' @return a N x N numeric matrix (where N is number of column in input `x`) representing the mode difference between each column
 //' @export
 // [[Rcpp::export]]
 arma::mat pairdiff_mode(const arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> cols = R_NilValue, int min_value_count = 3, int n_bins = 512, double adjust = 1, double kernel_width_in_sd = 3, std::string bandwidth_method = "nrd", double mode_frac_maxdens = 1, std::string na_mode = "check") {
@@ -437,6 +447,7 @@ Rcpp::NumericVector pairscale_mode(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVec
 //' @description Pairwise normalization of columns in a matrix, using the median to define pairwise distances between columns
 //' @name pairscale_median
 //' @inheritParams pairscale_mode
+//' @return a numeric vector that represents the normalization factors that were applied to each column in x. Note that x is updated by reference.
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector pairscale_median(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> clusters = R_NilValue, int min_value_count = 3, int niter_irls = 50, std::string na_mode = "check") {
@@ -461,6 +472,7 @@ Rcpp::NumericVector pairscale_median(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerV
 //' @description Pairwise normalization of columns in a matrix, using the mean to define pairwise distances between columns
 //' @name pairscale_mean
 //' @inheritParams pairscale_mode
+//' @return a numeric vector that represents the normalization factors that were applied to each column in x. Note that x is updated by reference.
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector pairscale_mean(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> clusters = R_NilValue, int min_value_count = 3, int niter_irls = 50, std::string na_mode = "check") {
@@ -486,6 +498,7 @@ Rcpp::NumericVector pairscale_mean(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVec
 //' @name pairscale_trimmedmean
 //' @inheritParams pairscale_mode
 //' @param trim amount of trim to apply to both the lower- and upper-parts of a vector before computing the mean. 0 indicates no trim, 0.5 indicates 100% trim (i.e. 50% of data on both sides) so that value is out of bounds. Typically set to 0.1-0.3
+//' @return a numeric vector that represents the normalization factors that were applied to each column in x. Note that x is updated by reference.
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector pairscale_trimmedmean(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> clusters = R_NilValue, int min_value_count = 3, double trim = 0.2, int niter_irls = 50, std::string na_mode = "check") {
@@ -512,6 +525,7 @@ Rcpp::NumericVector pairscale_trimmedmean(arma::mat& x, Rcpp::Nullable<Rcpp::Int
 //' @name pairscale_madmean
 //' @inheritParams pairscale_mode
 //' @param threshold_std ratio of MAD a value has to be away from the median to be considered an outlier (and thus removed/ignored). Note that the MAD thresholds are inclusive, i.e. values at +/- threshold_std*MAD from median are included
+//' @return a numeric vector that represents the normalization factors that were applied to each column in x. Note that x is updated by reference.
 //' @export
 // [[Rcpp::export]]
 Rcpp::NumericVector pairscale_madmean(arma::mat& x, Rcpp::Nullable<Rcpp::IntegerVector> clusters = R_NilValue, int min_value_count = 3, double threshold_std = 3, int niter_irls = 50, std::string na_mode = "check") {
@@ -532,3 +546,35 @@ Rcpp::NumericVector pairscale_madmean(arma::mat& x, Rcpp::Nullable<Rcpp::Integer
 }
 
 
+
+
+
+//' @title graph Laplacian approach to finding normalization factors
+//' @description find normalization factors for a given distance matrix computed with e.g. `pairdiff_median()`. For increased robustness, this function offers iterative reweighted improvement of the initial estimate.
+//' @name solve_graph_laplacian
+//' @param M skew-symmetric input matrix, generated with e.g. `pairdiff_median()`
+//' @param niter_irls refine the initial estimate using N additional iterative reweighted least squares loops for robust graph laplacian
+//' @examples
+//' # toy example
+//' x = cbind(
+//'   c(1,2,3,4),
+//'   c(2,3,4,9),
+//'   c(1,2,4,5),
+//'   c(1,0,1,0)
+//' )
+//' # compute pairwide median difference between all columns
+//' M = pairscale::pairdiff_median(x)
+//' # solve matrix M to find scaling factors, without and with reweighting
+//' s1 = pairscale::solve_graph_laplacian(M, niter_irls = 0)
+//' s2 = pairscale::solve_graph_laplacian(M, niter_irls = 10)
+//' # rescaled matrices; only the robust variant correctly aligns columns 1 and 2
+//' t(t(x) - s1)
+//' t(t(x) - s2)
+//' @return a numeric vector of length `ncol(M)` that contains scaling factors for `M`
+//' @export
+// [[Rcpp::export]]
+Rcpp::NumericVector solve_graph_laplacian(arma::mat M, int niter_irls = 1) {
+  Rcpp::NumericVector result = Rcpp::wrap(_solve_graph_laplacian(M, niter_irls));
+  result.attr("dim") = R_NilValue;
+  return result;
+}

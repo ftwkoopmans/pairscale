@@ -21,5 +21,5 @@
 #include <RcppArmadillo.h>
 
 arma::vec _pairscale_normalization(arma::mat& x, const arma::uvec& clusters, std::string centeral_tendency_measure, int min_value_count, int density_npoints, double density_adjust, double density_kernel_width_in_sd, std::string bandwidth_method, double mode_frac_maxdens, double tmean_trim, double threshold_std, int niter_irls, bool check_na);
-
+arma::vec _solve_graph_laplacian(arma::mat M, int niter_irls = 1);
 #endif

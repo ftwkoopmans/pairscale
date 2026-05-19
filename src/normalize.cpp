@@ -44,32 +44,8 @@ arma::vec laplacian_solver(arma::mat L, arma::vec v) {
 
 
 
-//' @title graph Laplacian approach to finding normalization factors
-//' @description find normalization factors for a given distance matrix computed with e.g. `pairdiff_median()`. For increased robustness, this function offers iterative reweighted improvement of the initial estimate.
-//' @name solve_graph_laplacian
-//' @param M skew-symmetric input matrix, generated with e.g. `pairdiff_median()`
-//' @param niter_irls refine the initial estimate using N additional iterative reweighted least squares loops for robust graph laplacian
-//' @examples
-//' \dontrun{
-//' # toy example
-//' x = cbind(
-//'   c(1,2,3,4),
-//'   c(2,3,4,9),
-//'   c(1,2,4,5),
-//'   c(1,0,1,0)
-//' )
-//' # compute pairwide median difference between all columns
-//' M = pairdiff_median(x)
-//' # solve matrix M to find scaling factors, without and with reweighting
-//' s1 = pairscale::solve_graph_laplacian(M, niter_irls = 0)
-//' s2 = pairscale::solve_graph_laplacian(M, niter_irls = 10)
-//' # rescaled matrices; only the robust variant correctly aligns columns 1 and 2
-//' t(t(x) - s1[,1])
-//' t(t(x) - s2[,1])
-//' }
-//' @export
-// [[Rcpp::export]]
-arma::vec solve_graph_laplacian(arma::mat M, int niter_irls = 1) {
+
+arma::vec _solve_graph_laplacian(arma::mat M, int niter_irls) {
   const int n = M.n_rows;
 
   // Adjacency matrix A: 1 if M(i,j) is finite (not NA/NaN), 0 otherwise
@@ -223,7 +199,7 @@ arma::vec _pairscale_normalization(arma::mat& x, const arma::uvec& clusters, std
 
       //distmat = _pairwise_distance_robustmode(x, cols, min_value_count, density_npoints, density_adjust, density_kernel_width_in_sd, check_na);
       // compute scaling factors for each column
-      factors = solve_graph_laplacian(distmat, niter_irls);
+      factors = _solve_graph_laplacian(distmat, niter_irls);
       // store factors in overall result vector
       all_factors(cols) = factors;
       // Rcpp::Rcout << "factors: " << factors << "\n";
@@ -273,7 +249,7 @@ arma::vec _pairscale_normalization(arma::mat& x, const arma::uvec& clusters, std
       }
     }
 
-    factors = solve_graph_laplacian(distmat, niter_irls);
+    factors = _solve_graph_laplacian(distmat, niter_irls);
 
     // rescale matrix; iterate clusters and subtract factor to all columns
     for(int i = 0; i < nclust; i++) {

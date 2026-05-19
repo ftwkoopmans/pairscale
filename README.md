@@ -35,13 +35,13 @@ v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/
     R command: `R.version.string`
   - if you need to install or upgrade R
     - download the latest/current version from
-      <https://cloud.r-project.org/bin/windows/base/>
+      <https://cran.r-project.org/bin/windows/base/>
 - RTools is required
   - check RTools is installed using the R command;
     `pkgbuild::check_rtools()` (assuming you have the “pkgbuild” package
     installed)
   - if not, get the RTools installer matching your R version from
-    <https://cloud.r-project.org/bin/windows/Rtools/>
+    <https://cran.r-project.org/bin/windows/Rtools/>
 - Reboot your computer (not mandatory, but this’ll avoid obscure
   bugs/issues)
 - Download and install the RStudio desktop IDE. Current link;
@@ -213,7 +213,7 @@ for(j in 1:ncol(mat)) {
 }
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
 
 ``` r
 # use pairscale to apply mode normalization
@@ -254,14 +254,14 @@ for(j in 1:ncol(mat)) {
 }
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-2-2.png)<!-- -->
 
 ``` r
 # visualize the normalized data matrix to illustrate all rows are similar except those set to NA
 heatmap(mat[order(baseline),], Rowv = NA, Colv = NA, scale = "none")
 ```
 
-![](readme_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
+![](README_files/figure-gfm/unnamed-chunk-2-3.png)<!-- -->
 
 # benchmark computation speed
 

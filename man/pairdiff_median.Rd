@@ -15,6 +15,9 @@ pairdiff_median(x, cols = NULL, min_value_count = 3L, na_mode = "check")
 
 \item{na_mode}{string value that indicated how should we should deal with NA values (default). "check" = test if NA values are present and if so, remove these. "present" = you already know NA values are present so we can skip the check for NA values for efficiency. "unchecked" = you guarantee that there are no NA values in input, thus we'll use the fastest code paths that skip over any NA checks downstream; ONLY select this if you are sure there are no NA/NaN/Inf/-Inf values !}
 }
+\value{
+a N x N numeric matrix (where N is number of column in input \code{x}) representing the median difference between each column
+}
 \description{
 Pairwise differences between all columns in a matrix
 }

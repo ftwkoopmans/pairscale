@@ -26,6 +26,9 @@ pairscale_madmean(
 
 \item{na_mode}{string value that indicated how should we should deal with NA values (default). "check" = test if NA values are present and if so, remove these. "present" = you already know NA values are present so we can skip the check for NA values for efficiency. "unchecked" = you guarantee that there are no NA values in input, thus we'll use the fastest code paths that skip over any NA checks downstream; ONLY select this if you are sure there are no NA/NaN/Inf/-Inf values !}
 }
+\value{
+a numeric vector that represents the normalization factors that were applied to each column in x. Note that x is updated by reference.
+}
 \description{
 Pairwise normalization of columns in a matrix, using the MAD-trimmed mean to define pairwise distances between columns
 }
