@@ -89,6 +89,7 @@ lfqbench_matrix__classification = msdap::regex_classification(lfqbench_matrix__p
 print(table(lfqbench_matrix__classification))
 # proportion of NA values per FileName; colSums(!is.na(lfqbench_matrix), na.rm=T) / nrow(lfqbench_matrix)
 
+save(lfqbench_matrix, lfqbench_matrix__condition, lfqbench_matrix__proteingroup, lfqbench_matrix__classification, file = "~/temp/lfqbench.RData")
 
 
 ######################################## generate synthetic datasets
@@ -208,17 +209,28 @@ norm_function_wrapper = function(data_matrix, param_algo) {
     data_matrix = vsn::justvsn(2^data_matrix) # note; justvsn takes non-log input
   }
 
+  if(param_algo == "median_shift") {
+    # sample/column medians
+    s = apply(data_matrix, 2, median, na.rm = TRUE)
+    # scaling factor s = relative to mean value across col medians
+    s = s - mean(s)
+    for(j in seq_along(tmp)) {
+      data_matrix[,j] = data_matrix[,j] - s[j]
+    }
+    # QC; boxplot(data_matrix, outline = F, horizontal = T, las = 1, cex.axis = 0.4)
+  }
+
   return(data_matrix)
 }
 
 
-compute_error = function(param_algo, mat_input, col_condition, row_classifications) {
-  # add a constant to force local deep copy. Should not be needed in R, but enforce anyway
-  mat_norm = norm_function_wrapper(mat_input + 0.0, param_algo)
+compute_error = function(param_algo, mat_input, col_condition, row_classifications, minval = 2) {
+  # add a constant to force local deep copy
+  mat_norm = norm_function_wrapper(mat_input + 10^-16, param_algo)
   cond_a = mat_norm[,col_condition == "A"]
   cond_b = mat_norm[,col_condition == "B"]
   log2fc = apply(cond_b, 1, mean, na.rm = TRUE) - apply(cond_a, 1, mean, na.rm = TRUE)
-  rows = is.finite(log2fc) & rowSums(is.finite(cond_a)) >= 2 & rowSums(is.finite(cond_b)) >= 2
+  rows = is.finite(log2fc) & rowSums(is.finite(cond_a)) >= minval & rowSums(is.finite(cond_b)) >= minval
   return(tibble(classification = row_classifications[rows], log2fc = log2fc[rows], algo = param_algo))
 }
 
